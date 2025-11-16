@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+# generate doc
+```shell
+dart doc
+```
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

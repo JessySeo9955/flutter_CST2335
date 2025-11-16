@@ -1,16 +1,54 @@
 import 'package:flutter/material.dart';
+import 'AppLocalizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  static void setLocale(BuildContext context, Locale newLocale) async {
+
+    //this retrieves the state
+    MyAppState? state = context.findAncestorStateOfType<MyAppState>();
+    state?.changeLanguage(newLocale);
+  }
+
+  @override
+  MyAppState createState() {
+    return MyAppState();
+  }
+}
+
+class MyAppState extends State<MyApp> {
+  //app starts off with this language:
+  var _locale = Locale("en", "ca");//english from canada
+
+  void changeLanguage(Locale locale){
+    setState(() {
+      _locale = locale;  //this updates your language to the new one
+    });
+  }
+
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      supportedLocales: [   //list all the languages your app supports:
+        Locale("en", "CA"),
+        Locale("bn"),
+        Locale("zh"),
+        Locale("ko"),
+      ],
+      localizationsDelegates: const [   //copy and paste this, don't change it
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      locale: _locale, //starting language
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -54,6 +92,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  //app starts off with this language:
+  var _locale = Locale("en", "ca");//english from canada
+
   int _counter = 0;
 
   void _incrementCounter() {
@@ -77,6 +119,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("en", "CA")); },
+              child: Text("English")),
+          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("ko")); },
+              child: Text("Korean")),
+          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("zh")); },
+              child: Text("Chinese")),
+          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("bn")); },
+              child: Text("Bengali")),
+        ],
         // TRY THIS: Try changing the color here to a specific color (to
         // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
         // change color while the other colors stay the same.
@@ -104,7 +156,7 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text('You have pushed the button this many times:'),
+            Text(AppLocalizations.of(context)!.translate('TextSelect')!,style: TextStyle(fontSize: 30.0)),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
