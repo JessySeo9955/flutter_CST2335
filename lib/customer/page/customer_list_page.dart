@@ -109,7 +109,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
         _selectedIndex = _customers.indexOf(customer);
       });
     } else {
-      // TODO
+      Navigator.push(context,
+          MaterialPageRoute(builder: (_) => CustomerFormPage(customer: customer, onSave: _reload)));
     }
   }
 }
