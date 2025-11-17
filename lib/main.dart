@@ -53,6 +53,7 @@ class MyAppState extends State<MyApp> {
         '/customer': (context) => CustomerListPage(),
         '/car': (context) => DummyPage(title: "Car Page"),
         '/boat': (context) => DummyPage(title: "Boat Page"),
+        '/purchase': (context) => DummyPage(title: "Purchase Page"),
       },
     );
   }
