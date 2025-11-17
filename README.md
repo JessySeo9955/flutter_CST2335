@@ -4,7 +4,11 @@ A new Flutter project.
 
 # generate doc
 ```shell
+# generate dart doc
 dart doc
+
+# generate sql floordatabase
+flutter packages pub run build_runner build
 ```
 
 ## Getting Started

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'AppLocalizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'customer/page/customer_list_page.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -9,166 +11,128 @@ void main() {
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  static void setLocale(BuildContext context, Locale newLocale) async {
-
-    //this retrieves the state
-    MyAppState? state = context.findAncestorStateOfType<MyAppState>();
+  static void setLocale(BuildContext context, Locale newLocale) {
+    final state = context.findAncestorStateOfType<MyAppState>();
     state?.changeLanguage(newLocale);
   }
 
   @override
-  MyAppState createState() {
-    return MyAppState();
-  }
+  MyAppState createState() => MyAppState();
 }
 
 class MyAppState extends State<MyApp> {
-  //app starts off with this language:
-  var _locale = Locale("en", "ca");//english from canada
+  Locale _locale = const Locale("en", "CA");
 
-  void changeLanguage(Locale locale){
-    setState(() {
-      _locale = locale;  //this updates your language to the new one
-    });
+  void changeLanguage(Locale locale) {
+    setState(() => _locale = locale);
   }
 
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      supportedLocales: [   //list all the languages your app supports:
+      debugShowCheckedModeBanner: false,
+      supportedLocales: const [
         Locale("en", "CA"),
         Locale("bn"),
         Locale("zh"),
         Locale("ko"),
       ],
-      localizationsDelegates: const [   //copy and paste this, don't change it
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
-      locale: _locale, //starting language
+      locale: _locale,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const MyHomePage(),
+        '/customer': (context) => CustomerListPage(),
+        '/car': (context) => DummyPage(title: "Car Page"),
+        '/boat': (context) => DummyPage(title: "Boat Page"),
+      },
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-
-  //app starts off with this language:
-  var _locale = Locale("en", "ca");//english from canada
-
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
+        title: Text("Main Menu", style: TextStyle(fontWeight: FontWeight.w600)),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         actions: [
-          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("en", "CA")); },
-              child: Text("English")),
-          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("ko")); },
-              child: Text("Korean")),
-          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("zh")); },
-              child: Text("Chinese")),
-          FilledButton(onPressed: (){MyApp.setLocale(context, Locale("bn")); },
-              child: Text("Bengali")),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language),
+            onSelected: (value) {
+              if (value == "en")
+                MyApp.setLocale(context, const Locale("en", "CA"));
+              if (value == "ko") MyApp.setLocale(context, const Locale("ko"));
+              if (value == "zh") MyApp.setLocale(context, const Locale("zh"));
+              if (value == "bn") MyApp.setLocale(context, const Locale("bn"));
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(value: "en", child: Text("English")),
+              const PopupMenuItem(value: "ko", child: Text("한국어")),
+              const PopupMenuItem(value: "zh", child: Text("中文")),
+              const PopupMenuItem(value: "bn", child: Text("বাংলা")),
+            ],
+          ),
         ],
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
       ),
+
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(AppLocalizations.of(context)!.translate('TextSelect')!,style: TextStyle(fontSize: 30.0)),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                AppLocalizations.of(context)!.translate("TextSelect")!,
+                style: const TextStyle(fontSize: 26),
+              ),
+
+              const SizedBox(height: 40),
+
+              _menuButton(context, "Customer List", "/customer"),
+              const SizedBox(height: 16),
+
+              _menuButton(context, "Profile Page", "/profile"),
+              const SizedBox(height: 16),
+
+              _menuButton(context, "Settings", "/settings"),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  Widget _menuButton(BuildContext context, String label, String route) {
+    return ElevatedButton(
+      onPressed: () => Navigator.pushNamed(context, route),
+      child: Text(label),
+    );
+  }
+}
+
+// Simple placeholder pages for clean navigation
+class DummyPage extends StatelessWidget {
+  final String title;
+  const DummyPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: Center(child: Text(title, style: TextStyle(fontSize: 22))),
     );
   }
 }
