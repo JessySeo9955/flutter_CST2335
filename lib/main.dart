@@ -101,13 +101,13 @@ class MyHomePage extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              _menuButton(context, "Car List", "/car"),
+              _menuButton(context, 'Customer Page', '/customer'),
               const SizedBox(height: 16),
 
-              _menuButton(context, "Boat Page", "/boat"),
+              _menuButton(context, 'Car Page', '/car'),
               const SizedBox(height: 16),
 
-              _menuButton(context, "Settings", "/settings"),
+              _menuButton(context, 'Boat Page', '/boat'),
             ],
           ),
         ),
