@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import '../data/customer_model.dart';
 import '../service/customer_service.dart';
 
+/// A form panel widget used for creating or editing a `Customer`
 class CustomerFormPanel extends StatefulWidget {
+  /// The customer being edited.
   final Customer? customer;
+  /// Callback executed when the form is submitted successfully.
   final VoidCallback onSubmit;
 
-  const CustomerFormPanel({Key? key, this.customer, required this.onSubmit})
-    : super(key: key);
+  /// Creates a form panel for adding or editing a customer.
+  const CustomerFormPanel({super.key, this.customer, required this.onSubmit});
 
   @override
   State<StatefulWidget> createState() {
@@ -16,53 +19,68 @@ class CustomerFormPanel extends StatefulWidget {
   }
 }
 
+/// State class for [CustomerFormPanel], responsible for handling input
+/// controllers, editing mode, validation, saving, deleting, and UI updates.
 class _CustomerFormPanelState extends State<CustomerFormPanel> {
+
+  /// Service layer used for database and preference operations.
   final _service = CustomerService();
 
+  /// Controller for the customer's first name field.
   late TextEditingController _firstController;
+
+  /// Controller for the customer's last name field.
   late TextEditingController _lastController;
+
+  /// Controller for the customer's address field.
   late TextEditingController _addressController;
+
+  /// Controller for the customer's date of birth field.
   late TextEditingController _dobController;
+
+  /// Controller for the customer's license number field.
   late TextEditingController _licenseController;
 
+  /// Indicates whether the panel is editing an existing customer.
   bool _editing = false;
+
+
+
 
   @override
   void initState() {
     super.initState();
-    _init();
 
     _editing = widget.customer != null;
-    _firstController = TextEditingController(
-      text: widget.customer?.firstName ?? "",
-    );
-    _lastController = TextEditingController(
-      text: widget.customer?.lastName ?? "",
-    );
-    _addressController = TextEditingController(
-      text: widget.customer?.address ?? "",
-    );
-    _dobController = TextEditingController(
-      text: widget.customer?.birthdate ?? "",
-    );
-    _licenseController = TextEditingController(
-      text: widget.customer?.licenseNo ?? "",
-    );
+    _firstController = TextEditingController(text: widget.customer?.firstName);
+    _lastController = TextEditingController(text: widget.customer?.lastName);
+    _addressController = TextEditingController(text: widget.customer?.address);
+    _dobController = TextEditingController(text: widget.customer?.birthdate);
+    _licenseController = TextEditingController(text: widget.customer?.licenseNo);
   }
 
-  Future<void> _init() async {
-    setState(() {});
+  @override
+  void dispose() {
+    _firstController.dispose();
+    _lastController.dispose();
+    _addressController.dispose();
+    _dobController.dispose();
+    _licenseController.dispose();
+    super.dispose();
   }
 
+  /// Validates and saves the customer.
+  /// - If editing: updates the existing customer.
+  /// - If adding: saves a new customer.
   void _save() async {
     String message = '';
     final customer = Customer(
       id: _editing ? widget.customer!.id : null, // IMPORTANT
-      firstName: _firstController.text ?? "",
-      lastName: _lastController.text ?? "",
-      address: _addressController.text ?? "",
-      birthdate: _dobController.text ?? "",
-      licenseNo: _licenseController.text ?? "",
+      firstName: _firstController.text,
+      lastName: _lastController.text,
+      address: _addressController.text,
+      birthdate: _dobController.text,
+      licenseNo: _licenseController.text,
     );
 
     if (!_service.validateFields(customer)) {
@@ -87,6 +105,7 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
     _close();
   }
 
+  /// Loads the last saved customer from preferences and fills the input fields.
   void _loadPreviousCustomer() async {
     Customer? customer = await _service.loadLastCustomer();
     if (customer != null) {
@@ -98,10 +117,12 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
     }
   }
 
+  /// Executes the `onSubmit` callback to notify parent widgets.
   void _close() async {
     widget.onSubmit();
   }
 
+  /// Shows a confirmation dialog and deletes the customer if confirmed.
   void _delete() {
     showDialog(
       context: context,
@@ -126,6 +147,7 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
     );
   }
 
+  /// Builds the header containing the page title and copy button.
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,

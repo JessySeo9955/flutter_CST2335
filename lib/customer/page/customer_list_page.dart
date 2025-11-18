@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cst2335/customer/page/customer_form_page.dart';
 
@@ -6,27 +5,32 @@ import '../data/customer_model.dart';
 import '../service/customer_service.dart';
 import '../widget/customer_form_panel.dart';
 
+/// Displays a list of customers and allows adding or editing customers.
 class CustomerListPage extends StatefulWidget {
+  const CustomerListPage({super.key});
+
   @override
   _CustomerListPageState createState() {
     return _CustomerListPageState();
   }
 }
 
+/// State class for [CustomerListPage], responsible for loading customers,
+/// handling selection, and managing phone/tablet UI modes.
 class _CustomerListPageState extends State<CustomerListPage> {
+  /// Customer service responsible for database operations.
   final _service = CustomerService();
+  /// List of all loaded customers.
   List<Customer> _customers = [];
+  /// Indicates if the layout should switch to tablet mode.
   bool _isTablet = false;
-  int? _selectedIndex; // tablet use
+  /// Selected customer index when using tablet split-view mode.
+  int? _selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    _initDB();
-  }
-
-  Future<void> _initDB() async {
-    _reload();
+     _reload();
   }
 
   @override
@@ -77,6 +81,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
+  /// Builds the scrollable list of customers.
   Widget _buildList() {
     return ListView.builder(
       itemCount: _customers.length,
@@ -91,26 +96,34 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
+  /// Called when the form page finishes saving a customer (phone mode).
   void _saveCallbackFromPage() {
     _reload();
   }
 
+  /// Called when the customer form panel saves data (tablet mode).
   void _saveCallbackFromWidget() {
     _reload();
     _selectedIndex = null;
   }
 
-  void _reload() async {
-    _customers = await _service.getCustomers();
-    if (mounted) setState(() {});
+  /// Reloads customer data from the service and updates the UI.
+  Future<void> _reload() async {
+    final data = await _service.getCustomers();  // async DB work
+
+    setState(() {
+      _customers = data;  // sync state update
+    });
   }
 
+  /// Shows a Snackbar message at the bottom of the screen.
   void _showSnackBar(String message) {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  /// Shows an instruction dialog explaining how to use the page.
   void _showInstructions() {
     showDialog(
       context: context,
@@ -123,6 +136,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
+  /// Handles customer selection based on the device layout.
   void _selectCustomer(Customer customer) {
     if (_isTablet) {
       setState(() {
