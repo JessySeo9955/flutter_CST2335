@@ -206,6 +206,7 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
                   child: Text(_editing ? "Update" : "Submit"),
                 ),
                 if (_editing)
+                  const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _delete,
                     style: ElevatedButton.styleFrom(

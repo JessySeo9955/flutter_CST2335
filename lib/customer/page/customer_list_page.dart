@@ -61,24 +61,46 @@ class _CustomerListPageState extends State<CustomerListPage> {
         ),
         child: Icon(Icons.add),
       ),
-      body: _isTablet
-          ? Row(
-              children: [
-                Expanded(flex: 1, child: _buildList()),
-                Expanded(
-                  flex: 2,
-                  child: _selectedIndex == null
-                      ? Center(child: Text("Select a customer"))
-                      : CustomerFormPanel(
-                          key: ValueKey(_customers[_selectedIndex!].id),
-                          customer: _customers[_selectedIndex!],
-                          onSubmit: _saveCallbackFromWidget,
-                        ),
-                ),
-              ],
-            )
-          : _buildList(),
+      body: _reactiveLayout(),
     );
+  }
+
+  Widget _reactiveLayout() {
+    if (_isTablet) {
+      return Row(
+        children: [
+          Expanded(flex: 1, child: _buildList()),
+          Expanded(
+            flex: 2,
+            child: _selectedIndex == null
+                ? Center(child: Text("Select a customer"))
+                : CustomerFormPanel(
+              key: ValueKey(_customers[_selectedIndex!].id),
+              customer: _customers[_selectedIndex!],
+              onSubmit: _saveCallbackFromWidget,
+            ),
+          ),
+        ],
+      );
+    } else {
+
+      if (_selectedIndex == null && _customers.isNotEmpty) {
+        return _buildList();       // show list first
+      } else {
+        return _buildDetailPanel();    // show details after selection
+      }
+    }
+  }
+
+  Widget _buildDetailPanel() {
+    return _selectedIndex == null
+        ? Center(child: Text("Select a customer"))
+        : CustomerFormPanel(
+      key: ValueKey(_customers[_selectedIndex!].id),
+      customer: _customers[_selectedIndex!],
+      onSubmit: _saveCallbackFromWidget,
+    );
+
   }
 
   /// Builds the scrollable list of customers.
