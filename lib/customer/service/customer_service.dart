@@ -5,20 +5,23 @@ import '../preference/customer_prefs.dart';
 
 class CustomerService {
 
+// 1. Private constructor
+  CustomerService._internal();
+
+  // 2. Single static instance
+  static final CustomerService _instance = CustomerService._internal();
+
+  // 3. Public static accessor
+  factory CustomerService() => _instance;
+
   late CustomerDao _dao;
 
-  CustomerService._();
-
-  static Future<CustomerService> create() async {
-    final service = CustomerService._();
-
-    // Open DB + get DAO
+  Future<void> init() async {
     final db = await $FloorCustomerDatabase
         .databaseBuilder("customer.db")
         .build();
-    service._dao = db.customerDao;
 
-    return service;
+    _dao = db.customerDao;
   }
 
   bool validateFields(Customer customer) {

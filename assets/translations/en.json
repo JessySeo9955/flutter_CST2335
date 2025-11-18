@@ -4,7 +4,7 @@
   "Name" : "Word",
   "Add" : "Add word",
   "Ok" : "Ok",
-  "TextSelect" : "Select an item from the list to see the details"
+  "TextSelect" : "Default: Select an item from the list to see the details"
 
 
 }

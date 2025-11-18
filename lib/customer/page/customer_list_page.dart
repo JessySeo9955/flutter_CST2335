@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cst2335/customer/page/customer_form_page.dart';
 
-import '../data/customer_dao.dart';
-import '../data/customer_database.dart';
 import '../data/customer_model.dart';
+import '../service/customer_service.dart';
+import '../widget/customer_form_panel.dart';
 
 class CustomerListPage extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class CustomerListPage extends StatefulWidget {
 }
 
 class _CustomerListPageState extends State<CustomerListPage> {
-  late CustomerDao _dao;
+  final _service = CustomerService();
   List<Customer> _customers = [];
   bool _isTablet = false;
   int? _selectedIndex; // tablet use
@@ -26,10 +26,6 @@ class _CustomerListPageState extends State<CustomerListPage> {
   }
 
   Future<void> _initDB() async {
-    final db = await $FloorCustomerDatabase
-        .databaseBuilder('customer.db')
-        .build();
-    _dao = db.customerDao;
     _reload();
   }
 
@@ -40,17 +36,24 @@ class _CustomerListPageState extends State<CustomerListPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Customers'),
-        actions: [IconButton(onPressed: () => _showInstructions(), icon: Icon(Icons.info))],
+        actions: [
+          IconButton(
+            onPressed: () => _showInstructions(),
+            icon: Icon(Icons.info),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (_) => CustomerFormPage(onSave: () {
-                  _reload();
-                  _showSnackBar('List updated');
-                })
-            )
+          context,
+          MaterialPageRoute(
+            builder: (_) => CustomerFormPage(
+              onSave: () {
+                _saveCallbackFromPage();
+                _showSnackBar('List updated');
+              },
+            ),
+          ),
         ),
         child: Icon(Icons.add),
       ),
@@ -60,7 +63,13 @@ class _CustomerListPageState extends State<CustomerListPage> {
                 Expanded(flex: 1, child: _buildList()),
                 Expanded(
                   flex: 2,
-                  child: Center(child: Text('Select a Customer')),
+                  child: _selectedIndex == null
+                      ? Center(child: Text("Select a customer"))
+                      : CustomerFormPanel(
+                          key: ValueKey(_customers[_selectedIndex!].id),
+                          customer: _customers[_selectedIndex!],
+                          onSubmit: _saveCallbackFromWidget,
+                        ),
                 ),
               ],
             )
@@ -76,30 +85,41 @@ class _CustomerListPageState extends State<CustomerListPage> {
         return ListTile(
           title: Text('${customer.firstName} ${customer.lastName}'),
           subtitle: Text(customer.address),
-          onTap: () => _selectCustomer(customer)
+          onTap: () => _selectCustomer(customer),
         );
       },
     );
   }
 
+  void _saveCallbackFromPage() {
+    _reload();
+  }
+
+  void _saveCallbackFromWidget() {
+    _reload();
+    _selectedIndex = null;
+  }
+
   void _reload() async {
-    _customers = await _dao.getAllCustomers();
-    setState(() {});
+    _customers = await _service.getCustomers();
+    if (mounted) setState(() {});
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _showInstructions() {
     showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: Text('Instructions'),
-          content: Text('Tap + to add customers. \nTap a customer to view details.'),
-        )
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Instructions'),
+        content: Text(
+          'Tap + to add customers. \nTap a customer to view details.',
+        ),
+      ),
     );
   }
 
@@ -109,8 +129,17 @@ class _CustomerListPageState extends State<CustomerListPage> {
         _selectedIndex = _customers.indexOf(customer);
       });
     } else {
-      Navigator.push(context,
-          MaterialPageRoute(builder: (_) => CustomerFormPage(customer: customer, onSave: _reload)));
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CustomerFormPage(
+            customer: customer,
+            onSave: () {
+              _saveCallbackFromPage();
+            },
+          ),
+        ),
+      );
     }
   }
 }

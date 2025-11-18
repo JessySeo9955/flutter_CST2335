@@ -3,8 +3,10 @@ import 'AppLocalizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'customer/page/customer_list_page.dart';
+import 'customer/service/customer_service.dart';
 
-void main() {
+void main() async {
+  await CustomerService().init();
   runApp(const MyApp());
 }
 
@@ -21,7 +23,7 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  Locale _locale = const Locale("en", "CA");
+  Locale _locale = const Locale("en", "US");
 
   void changeLanguage(Locale locale) {
     setState(() => _locale = locale);
@@ -32,10 +34,9 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       supportedLocales: const [
-        Locale("en", "CA"),
-        Locale("bn"),
-        Locale("zh"),
-        Locale("ko"),
+        Locale("en", "GB"),
+        Locale("en", "US"),
+
       ],
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -73,17 +74,13 @@ class MyHomePage extends StatelessWidget {
           PopupMenuButton<String>(
             icon: const Icon(Icons.language),
             onSelected: (value) {
-              if (value == "en")
-                MyApp.setLocale(context, const Locale("en", "CA"));
-              if (value == "ko") MyApp.setLocale(context, const Locale("ko"));
-              if (value == "zh") MyApp.setLocale(context, const Locale("zh"));
-              if (value == "bn") MyApp.setLocale(context, const Locale("bn"));
+              if (value == "en_US") MyApp.setLocale(context, const Locale("en", "US"));
+              if (value == "en_GB") MyApp.setLocale(context, const Locale("en", "GB"));
+
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(value: "en", child: Text("English")),
-              const PopupMenuItem(value: "ko", child: Text("한국어")),
-              const PopupMenuItem(value: "zh", child: Text("中文")),
-              const PopupMenuItem(value: "bn", child: Text("বাংলা")),
+              const PopupMenuItem(value: "en_US", child: Text("English-US")),
+              const PopupMenuItem(value: "en_GB", child: Text("English-UK")),
             ],
           ),
         ],
