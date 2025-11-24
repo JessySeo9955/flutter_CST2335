@@ -4,12 +4,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'customer/page/customer_list_page.dart';
 import 'customer/service/customer_service.dart';
+import 'boat/page/boat_list_page.dart';
+import 'boat/service/boat_service.dart';
 
 
 /// Entry point of the application.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await CustomerService().init();
+  await BoatService().init();
   runApp(const MyApp());
 }
 /// The root widget of the application.
@@ -60,7 +63,7 @@ class MyAppState extends State<MyApp> {
         '/': (context) => const MyHomePage(),
          '/customer': (context) => CustomerListPage(),
         '/car': (context) => DummyPage(title: "Car Page"),
-        '/boat': (context) => DummyPage(title: "Boat Page"),
+        '/boat': (context) => BoatListPage(),
         '/purchase': (context) => DummyPage(title: "Purchase Page"),
       },
     );

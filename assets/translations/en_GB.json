@@ -27,5 +27,21 @@
   "DeleteConfirm": "Are you sure you want to delete this customer?",
   "EditCustomerForm": "Edit Customer",
   "NewCustomer": "New Customer",
-  "CopyPreviousCustomer": "Copy previous customer"
+  "CopyPreviousCustomer": "Copy previous customer",
+
+  "Boats": "Boats for Sale",
+  "InstructionsTitleBoat": "Instructions",
+  "InstructionsContentBoat": "Tap + to add boats.\nTap a boat to view their details.",
+  "SelectBoat": "Select a boat",
+  "AddBoat": "Add Boat",
+  "EditBoat": "Edit Boat Details",
+  "YearBuilt": "Year Built",
+  "BoatLength": "Boat Length",
+  "PowerType": "Power Type (sail or motor)",
+  "Price": "Price",
+  "DeleteTitleBoat": "Delete Boat",
+  "DeleteConfirmBoat": "Are you sure you want to delete this boat?",
+  "EditBoatForm": "Edit Boat",
+  "NewBoat": "New Boat",
+  "CopyPreviousBoat": "Copy previous boat"
 }
