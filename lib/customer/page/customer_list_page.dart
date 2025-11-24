@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cst2335/customer/page/customer_form_page.dart';
+import '../../AppLocalizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 
 import '../data/customer_model.dart';
 import '../service/customer_service.dart';
@@ -39,7 +42,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Customers'),
+        title: Text(AppLocalizations.of(context)!.translate('Customers')!),
         actions: [
           IconButton(
             onPressed: () => _showInstructions(),
@@ -54,7 +57,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
             builder: (_) => CustomerFormPage(
               onSave: () {
                 _saveCallbackFromPage();
-                _showSnackBar('List updated');
+                _showSnackBar(AppLocalizations.of(context)!.translate("ListUpdated")!);
               },
             ),
           ),
@@ -65,6 +68,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
     );
   }
 
+  /// Displays reactive panels based on screen size.
   Widget _reactiveLayout() {
     if (_isTablet) {
       return Row(
@@ -73,7 +77,7 @@ class _CustomerListPageState extends State<CustomerListPage> {
           Expanded(
             flex: 2,
             child: _selectedIndex == null
-                ? Center(child: Text("Select a customer"))
+                ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectCustomer")!))
                 : CustomerFormPanel(
               key: ValueKey(_customers[_selectedIndex!].id),
               customer: _customers[_selectedIndex!],
@@ -92,9 +96,10 @@ class _CustomerListPageState extends State<CustomerListPage> {
     }
   }
 
+  /// Displays detail Panel.
   Widget _buildDetailPanel() {
     return _selectedIndex == null
-        ? Center(child: Text("Select a customer"))
+        ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectCustomer")!))
         : CustomerFormPanel(
       key: ValueKey(_customers[_selectedIndex!].id),
       customer: _customers[_selectedIndex!],
@@ -150,10 +155,8 @@ class _CustomerListPageState extends State<CustomerListPage> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text('Instructions'),
-        content: Text(
-          'Tap + to add customers. \nTap a customer to view details.',
-        ),
+        title: Text(AppLocalizations.of(context)!.translate("InstructionsTitle")!),
+        content: Text(AppLocalizations.of(context)!.translate("InstructionsContent")!),
       ),
     );
   }

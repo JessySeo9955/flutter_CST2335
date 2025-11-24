@@ -1,10 +1,31 @@
-
 {
-
   "Name" : "Word",
   "Add" : "Add word",
   "Ok" : "Ok",
-  "TextSelect" : "GB: Select an item from the list to see the details"
-
-
+  "TextSelect" : "GB: Select an item from the list to see the details",
+  "Customers": "Customers",
+  "InstructionsTitle": "Instructions",
+  "InstructionsContent": "Tap + to add customers.\nTap a customer to view their details.",
+  "ListUpdated": "List updated",
+  "SelectCustomer": "Select a customer",
+  "NoCustomers": "No customers found",
+  "AddCustomer": "Add Customer",
+  "EditCustomer": "Edit Customer Details",
+  "FirstName": "First Name",
+  "LastName": "Last Name",
+  "Address": "Address",
+  "DateOfBirth": "Date of Birth",
+  "LicenceNumber": "Licence Number",
+  "Submit": "Submit",
+  "Update": "Update",
+  "Delete": "Delete",
+  "Cancel": "Cancel",
+  "Saved": "Saved",
+  "Updated": "Updated",
+  "PleaseFillAllFields": "Please fill in all fields",
+  "DeleteTitle": "Delete Customer",
+  "DeleteConfirm": "Are you sure you want to delete this customer?",
+  "EditCustomerForm": "Edit Customer",
+  "NewCustomer": "New Customer",
+  "CopyPreviousCustomer": "Copy previous customer"
 }

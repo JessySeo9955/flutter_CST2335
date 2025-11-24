@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../AppLocalizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import '../data/customer_model.dart';
 import '../service/customer_service.dart';
 
@@ -73,6 +76,8 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
   /// - If editing: updates the existing customer.
   /// - If adding: saves a new customer.
   void _save() async {
+    final t = AppLocalizations.of(context)!;
+
     String message = '';
     final customer = Customer(
       id: _editing ? widget.customer!.id : null, // IMPORTANT
@@ -86,21 +91,21 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
     if (!_service.validateFields(customer)) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: const Text('Please fill all fields')));
+      ).showSnackBar(SnackBar(content: Text(t.translate("PleaseFillAllFields")!),));
       return;
     }
 
     if (_editing) {
-      message = 'Updated';
+      message = t.translate("Updated")!;
       await _service.updateCustomer(customer);
     } else {
-      message = 'Saved';
+      message = t.translate("Saved")!;
       await _service.saveCustomer(customer);
     }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
 
     _close();
   }
@@ -124,18 +129,20 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
 
   /// Shows a confirmation dialog and deletes the customer if confirmed.
   void _delete() {
+    final t = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Delete?'),
-        content: Text('Are you sure?'),
+        title: Text(t.translate("DeleteTitle")!),
+        content: Text(t.translate("DeleteConfirm")!),
         actions: [
           TextButton(
-            child: Text('cancel'),
+            child: Text(t.translate("Cancel")!),
             onPressed: () => Navigator.pop(context),
           ),
           TextButton(
-            child: Text('Delete'),
+            child: Text(t.translate("Delete")!),
             onPressed: () async {
               await _service.deleteCustomer(widget.customer!);
               Navigator.pop(dialogContext);
@@ -149,17 +156,21 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
 
   /// Builds the header containing the page title and copy button.
   Widget _buildHeader() {
+    final t = AppLocalizations.of(context)!;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          _editing ? "Edit Customer" : "New Customer",
+          _editing
+              ? t.translate("EditCustomerForm")!
+              : t.translate("NewCustomer")!,
           style: Theme.of(context).textTheme.titleLarge,
         ),
         if (!_editing)
           IconButton(
             icon: Icon(Icons.copy),
-            tooltip: "Copy previous customer",
+            tooltip: t.translate("CopyPreviousCustomer")!,
             onPressed: _loadPreviousCustomer,
           ),
       ],
@@ -168,6 +179,8 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -182,28 +195,42 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
 
                 TextField(
                   controller: _firstController,
-                  decoration: InputDecoration(labelText: "First Name"),
+                  decoration: InputDecoration(
+                    labelText: t.translate("FirstName")!,
+                  ),
                 ),
                 TextField(
                   controller: _lastController,
-                  decoration: InputDecoration(labelText: "Last Name"),
+                  decoration: InputDecoration(
+                    labelText: t.translate("LastName")!,
+                  ),
                 ),
                 TextField(
                   controller: _addressController,
-                  decoration: InputDecoration(labelText: "Address"),
+                  decoration: InputDecoration(
+                    labelText: t.translate("Address")!,
+                  ),
                 ),
                 TextField(
                   controller: _dobController,
-                  decoration: InputDecoration(labelText: "Date of Birth"),
+                  decoration: InputDecoration(
+                    labelText: t.translate("DateOfBirth")!,
+                  ),
                 ),
                 TextField(
                   controller: _licenseController,
-                  decoration: InputDecoration(labelText: "License #"),
+                  decoration: InputDecoration(
+                    labelText: t.translate("LicenceNumber")!, // UK spelling: licence
+                  ),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: _save,
-                  child: Text(_editing ? "Update" : "Submit"),
+                  child: Text(
+                    _editing
+                        ? t.translate("Update")!
+                        : t.translate("Submit")!,
+                  ),
                 ),
                 if (_editing)
                   const SizedBox(height: 16),
@@ -212,7 +239,7 @@ class _CustomerFormPanelState extends State<CustomerFormPanel> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: Text("Delete"),
+                    child: Text(t.translate("Delete")!),
                   ),
               ],
             ),

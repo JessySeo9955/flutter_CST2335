@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../AppLocalizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
 import '../data/customer_model.dart';
 import '../widget/customer_form_panel.dart';
 
@@ -19,10 +22,16 @@ class CustomerFormPage extends StatelessWidget  {
 
   @override
   Widget build(BuildContext context) {
+
+    final t = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(customer == null ? "Add Customer" : "Edit Customer"),
-
+        title: Text(
+          customer == null
+              ? t.translate("AddCustomer")!
+              : t.translate("EditCustomer")!,
+        ),
       ),
       body: CustomerFormPanel(
         customer: customer,
