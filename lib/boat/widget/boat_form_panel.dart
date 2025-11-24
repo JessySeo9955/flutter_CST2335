@@ -1,173 +1,195 @@
 import 'package:flutter/material.dart';
-
 import '../../AppLocalizations.dart';
-
 import '../data/boat_model.dart';
 import '../service/boat_service.dart';
 
-/// A form panel widget used for creating or editing a `Boat`
+// Form panel for boat creation and editing
 class BoatFormPanel extends StatefulWidget {
-  /// The boat being edited.
   final Boat? boat;
-  /// Callback executed when the form is submitted successfully.
   final VoidCallback onSubmit;
 
-  /// Creates a form panel for adding or editing a boat.
   const BoatFormPanel({super.key, this.boat, required this.onSubmit});
 
   @override
-  State<StatefulWidget> createState() {
-    return _BoatFormPanelState();
-  }
+  State<StatefulWidget> createState() => _BoatFormPanelState();
 }
 
-/// State class for [BoatFormPanel], responsible for handling input
-/// controllers, editing mode, validation, saving, deleting, and UI updates.
+// State for boat form panel
 class _BoatFormPanelState extends State<BoatFormPanel> {
+  final BoatService _boatService = BoatService();
 
-  /// Service layer used for database and preference operations.
-  final _service = BoatService();
+  late TextEditingController _addressCtrl;
+  late TextEditingController _priceCtrl;
+  late TextEditingController _powerCtrl;
+  late TextEditingController _lengthCtrl;
+  late TextEditingController _yearCtrl;
 
-  /// Controller for the year built field.
-  late TextEditingController _yearController;
+  bool _isEditMode = false;
 
-  /// Controller for the boat length field.
-  late TextEditingController _lengthController;
-
-  /// Controller for the power type field.
-  late TextEditingController _powerController;
-
-  /// Controller for the price field.
-  late TextEditingController _priceController;
-
-  /// Controller for the address field.
-  late TextEditingController _addressController;
-
-  /// Indicates whether the panel is editing an existing boat.
-  bool _editing = false;
+  String? _addressErr;
+  String? _priceErr;
+  String? _powerErr;
+  String? _lengthErr;
+  String? _yearErr;
 
   @override
   void initState() {
     super.initState();
-
-    _editing = widget.boat != null;
-    _yearController = TextEditingController(text: widget.boat?.yearBuilt);
-    _lengthController = TextEditingController(text: widget.boat?.boatLength);
-    _powerController = TextEditingController(text: widget.boat?.powerType);
-    _priceController = TextEditingController(text: widget.boat?.price);
-    _addressController = TextEditingController(text: widget.boat?.address);
+    _isEditMode = widget.boat != null;
+    _addressCtrl = TextEditingController(text: widget.boat?.address);
+    _priceCtrl = TextEditingController(text: widget.boat?.price);
+    _powerCtrl = TextEditingController(text: widget.boat?.powerType);
+    _lengthCtrl = TextEditingController(text: widget.boat?.boatLength);
+    _yearCtrl = TextEditingController(text: widget.boat?.yearBuilt);
   }
 
   @override
   void dispose() {
-    _yearController.dispose();
-    _lengthController.dispose();
-    _powerController.dispose();
-    _priceController.dispose();
-    _addressController.dispose();
+    _addressCtrl.dispose();
+    _priceCtrl.dispose();
+    _powerCtrl.dispose();
+    _lengthCtrl.dispose();
+    _yearCtrl.dispose();
     super.dispose();
   }
 
-  /// Validates and saves the boat.
-  /// - If editing: updates the existing boat.
-  /// - If adding: saves a new boat.
-  void _save() async {
-    final t = AppLocalizations.of(context)!;
+  // Check if field is valid
+  void _checkField(String fieldName, String fieldValue) {
+    setState(() {
+      final errorMsg = fieldValue.isEmpty ? '${fieldName.toUpperCase()} is required' : null;
+      
+      switch (fieldName) {
+        case 'address':
+          _addressErr = errorMsg;
+          break;
+        case 'price':
+          _priceErr = errorMsg;
+          break;
+        case 'power':
+          _powerErr = errorMsg;
+          break;
+        case 'length':
+          _lengthErr = errorMsg;
+          break;
+        case 'year':
+          _yearErr = errorMsg;
+          break;
+      }
+    });
+  }
 
-    String message = '';
-    final boat = Boat(
-      id: _editing ? widget.boat!.id : null,
-      yearBuilt: _yearController.text,
-      boatLength: _lengthController.text,
-      powerType: _powerController.text,
-      price: _priceController.text,
-      address: _addressController.text,
-    );
+  // Submit form data
+  void _submitForm() async {
+    final localization = AppLocalizations.of(context)!;
 
-    if (!_service.validateFields(boat)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.translate("PleaseFillAllFields")!),));
+    final fieldsToValidate = {
+      'address': _addressCtrl.text,
+      'price': _priceCtrl.text,
+      'power': _powerCtrl.text,
+      'length': _lengthCtrl.text,
+      'year': _yearCtrl.text,
+    };
+
+    fieldsToValidate.forEach((name, value) => _checkField(name, value));
+
+    final hasErrors = [_addressErr, _priceErr, _powerErr, _lengthErr, _yearErr]
+        .any((error) => error != null);
+
+    if (hasErrors) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(localization.translate("PleaseFillAllFields")!)),
+      );
       return;
     }
 
-    if (_editing) {
-      message = t.translate("Updated")!;
-      await _service.updateBoat(boat);
-    } else {
-      message = t.translate("Saved")!;
-      await _service.saveBoat(boat);
-    }
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+    final boatData = Boat(
+      id: _isEditMode ? widget.boat!.id : null,
+      address: _addressCtrl.text,
+      price: _priceCtrl.text,
+      powerType: _powerCtrl.text,
+      boatLength: _lengthCtrl.text,
+      yearBuilt: _yearCtrl.text,
     );
 
-    _close();
+    final msg = _isEditMode 
+        ? localization.translate("Updated")! 
+        : localization.translate("Saved")!;
+
+    _isEditMode 
+        ? await _boatService.updateBoat(boatData)
+        : await _boatService.saveBoat(boatData);
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    _closeForm();
   }
 
-  /// Loads the last saved boat from preferences and fills the input fields.
-  void _loadPreviousBoat() async {
-    Boat? boat = await _service.loadLastBoat();
-    if (boat != null) {
-      _yearController.text = boat.yearBuilt;
-      _lengthController.text = boat.boatLength;
-      _powerController.text = boat.powerType;
-      _priceController.text = boat.price;
-      _addressController.text = boat.address;
-    }
-  }
-
-  /// Executes the `onSubmit` callback to notify parent widgets.
-  void _close() async {
+  // Close form and notify parent
+  void _closeForm() async {
     widget.onSubmit();
   }
 
-  /// Shows a confirmation dialog and deletes the boat if confirmed.
-  void _delete() {
-    final t = AppLocalizations.of(context)!;
+  // Copy previous boat data to form
+  void _copyPrevious() async {
+    final previousBoat = await _boatService.loadLastBoat();
+    
+    if (previousBoat == null) return;
+    
+    setState(() {
+      _addressCtrl.text = previousBoat.address;
+      _priceCtrl.text = previousBoat.price;
+      _powerCtrl.text = previousBoat.powerType;
+      _lengthCtrl.text = previousBoat.boatLength;
+      _yearCtrl.text = previousBoat.yearBuilt;
+    });
+  }
+
+  // Remove boat after confirmation
+  void _removeBoat() {
+    final localization = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(t.translate("DeleteTitleBoat")!),
-        content: Text(t.translate("DeleteConfirmBoat")!),
-        actions: [
-          TextButton(
-            child: Text(t.translate("Cancel")!),
-            onPressed: () => Navigator.pop(context),
-          ),
-          TextButton(
-            child: Text(t.translate("Delete")!),
-            onPressed: () async {
-              await _service.deleteBoat(widget.boat!);
-              Navigator.pop(dialogContext);
-              _close();
-            },
-          ),
-        ],
-      ),
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: Text(localization.translate("DeleteTitleBoat")!),
+          content: Text(localization.translate("DeleteConfirmBoat")!),
+          actions: [
+            TextButton(
+              child: Text(localization.translate("Cancel")!),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text(localization.translate("Delete")!),
+              onPressed: () async {
+                await _boatService.deleteBoat(widget.boat!);
+                Navigator.pop(dialogCtx);
+                _closeForm();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
-  /// Builds the header containing the page title and copy button.
-  Widget _buildHeader() {
-    final t = AppLocalizations.of(context)!;
+  // Build form header with title
+  Widget _createHeader() {
+    final localization = AppLocalizations.of(context)!;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          _editing
-              ? t.translate("EditBoatForm")!
-              : t.translate("NewBoat")!,
+          _isEditMode
+              ? localization.translate("EditBoatForm")!
+              : localization.translate("NewBoat")!,
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        if (!_editing)
+        if (!_isEditMode)
           IconButton(
             icon: Icon(Icons.copy),
-            tooltip: t.translate("CopyPreviousBoat")!,
-            onPressed: _loadPreviousBoat,
+            tooltip: localization.translate("CopyPreviousBoat")!,
+            onPressed: _copyPrevious,
           ),
       ],
     );
@@ -175,91 +197,112 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final t = AppLocalizations.of(context)!;
+    final localization = AppLocalizations.of(context)!;
 
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _createHeader(),
           const SizedBox(height: 24),
           Expanded(
             child: ListView(
               children: [
                 TextField(
-                  controller: _yearController,
+                  controller: _addressCtrl,
                   decoration: InputDecoration(
-                    labelText: t.translate("YearBuilt")!,
+                    labelText: localization.translate("Address")!,
                     border: OutlineInputBorder(),
+                    errorText: _addressErr,
                   ),
+                  onChanged: (val) => _checkField('address', val),
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _lengthController,
+                  controller: _priceCtrl,
                   decoration: InputDecoration(
-                    labelText: t.translate("BoatLength")!,
+                    labelText: localization.translate("Price")!,
                     border: OutlineInputBorder(),
+                    errorText: _priceErr,
                   ),
+                  onChanged: (val) => _checkField('price', val),
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _powerController,
+                  controller: _powerCtrl,
                   decoration: InputDecoration(
-                    labelText: t.translate("PowerType")!,
+                    labelText: localization.translate("PowerType")!,
                     border: OutlineInputBorder(),
+                    errorText: _powerErr,
                   ),
+                  onChanged: (val) => _checkField('power', val),
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _priceController,
+                  controller: _lengthCtrl,
                   decoration: InputDecoration(
-                    labelText: t.translate("Price")!,
+                    labelText: localization.translate("BoatLength")!,
                     border: OutlineInputBorder(),
+                    errorText: _lengthErr,
                   ),
+                  onChanged: (val) => _checkField('length', val),
                 ),
                 const SizedBox(height: 16),
                 TextField(
-                  controller: _addressController,
+                  controller: _yearCtrl,
                   decoration: InputDecoration(
-                    labelText: t.translate("Address")!,
+                    labelText: localization.translate("YearBuilt")!,
                     border: OutlineInputBorder(),
+                    errorText: _yearErr,
                   ),
+                  onChanged: (val) => _checkField('year', val),
                 ),
                 const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: Text(
-                    _editing
-                        ? t.translate("Update")!
-                        : t.translate("Submit")!,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
-                if (_editing) ...[
-                  const SizedBox(height: 16),
+                if (_isEditMode)
                   Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: _delete,
+                          onPressed: _submitForm,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: Text(
+                            localization.translate("Update")!,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _removeBoat,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
                             padding: EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: Text(
-                            t.translate("Delete")!,
+                            localization.translate("Delete")!,
                             style: TextStyle(fontSize: 16),
                           ),
                         ),
                       ),
                     ],
+                  )
+                else
+                  ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: Text(
+                      localization.translate("Submit")!,
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
-                ],
               ],
             ),
           ),

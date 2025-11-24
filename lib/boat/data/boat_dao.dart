@@ -1,27 +1,23 @@
 import 'package:floor/floor.dart';
-
 import 'boat_model.dart';
 
-/// Data access object (DAO) for performing CRUD operations on `Boat`
-/// entities stored in the local database.
+// DAO interface for boat database operations
 @dao
 abstract class BoatDao {
+  // Delete operation - removes boat record
+  @delete
+  Future<int> deleteBoat(Boat boat);
 
-  /// Returns all boats from the database.
-  @Query('Select * From Boat')
-  Future<List<Boat>> getAllBoats();
-
-  /// Inserts a new `Boat` into the database.
-  /// Returns a `Future` containing the ID of the newly inserted row.
-  @insert
-  Future<int> insertBoat(Boat boat);
-
-  /// Updates a specific `Boat` in the database.
+  // Update operation - modifies existing boat
   @update
   Future<int> updateBoat(Boat boat);
 
-  /// Deletes a specific `Boat` from the database.
-  @delete
-  Future<int> deleteBoat(Boat boat);
+  // Insert operation - adds new boat record
+  @insert
+  Future<int> insertBoat(Boat boat);
+
+  // Query operation - retrieves all boats
+  @Query('Select * From Boat')
+  Future<List<Boat>> getAllBoats();
 }
 

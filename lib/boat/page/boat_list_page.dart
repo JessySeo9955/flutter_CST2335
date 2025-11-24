@@ -1,163 +1,178 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_cst2335/boat/page/boat_form_page.dart';
 import '../../AppLocalizations.dart';
-
 import '../data/boat_model.dart';
 import '../service/boat_service.dart';
 import '../widget/boat_form_panel.dart';
 
-/// Displays a list of boats and allows adding or editing boats.
+// Main page displaying boat list
 class BoatListPage extends StatefulWidget {
   const BoatListPage({super.key});
 
   @override
-  _BoatListPageState createState() {
-    return _BoatListPageState();
-  }
+  _BoatListPageState createState() => _BoatListPageState();
 }
 
-/// State class for [BoatListPage], responsible for loading boats,
-/// handling selection, and managing phone/tablet UI modes.
+// State for boat list page
 class _BoatListPageState extends State<BoatListPage> {
-  /// Boat service responsible for database operations.
-  final _service = BoatService();
-  /// List of all loaded boats.
-  List<Boat> _boats = [];
-  /// Indicates if the layout should switch to tablet mode.
-  bool _isTablet = false;
-  /// Selected boat index when using tablet split-view mode.
-  int? _selectedIndex;
+  final BoatService _boatSvc = BoatService();
+  List<Boat> _boatList = [];
+  bool _tabletMode = false;
+  int? _selectedIdx;
 
   @override
   void initState() {
     super.initState();
-    _reload();
+    _refreshBoats();
   }
 
   @override
   Widget build(BuildContext context) {
-    _isTablet = MediaQuery.of(context).size.width > 600;
+    _tabletMode = MediaQuery.of(context).size.width > 600;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppLocalizations.of(context)!.translate('Boats')!),
-        backgroundColor: Colors.blue[700],
-        actions: [
-          IconButton(
-            onPressed: () => _showInstructions(),
-            icon: Icon(Icons.info),
-          ),
-        ],
+      appBar: _buildAppBar(),
+      floatingActionButton: _buildAddButton(),
+      body: _buildResponsiveLayout(),
+    );
+  }
+
+  // Build app bar
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: Text(AppLocalizations.of(context)!.translate('Boats')!),
+      backgroundColor: Colors.blue[700],
+      actions: [
+        IconButton(
+          onPressed: _displayInstructions,
+          icon: Icon(Icons.info),
+        ),
+      ],
+    );
+  }
+
+  // Build floating action button
+  FloatingActionButton _buildAddButton() {
+    return FloatingActionButton(
+      onPressed: () => _navigateToNewBoatForm(),
+      backgroundColor: Colors.blue[700],
+      child: Icon(Icons.add),
+    );
+  }
+
+  // Navigate to new boat form
+  void _navigateToNewBoatForm() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BoatFormPage(
+          onSave: () {
+            _handlePageSave();
+            _displaySnackBar(AppLocalizations.of(context)!.translate("ListUpdated")!);
+          },
+        ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BoatFormPage(
-              onSave: () {
-                _saveCallbackFromPage();
-                _showSnackBar(AppLocalizations.of(context)!.translate("ListUpdated")!);
-              },
-            ),
+    );
+  }
+
+  // Build adaptive layout for different screen sizes
+  Widget _buildResponsiveLayout() {
+    return _tabletMode ? _buildTabletLayout() : _buildPhoneLayout();
+  }
+
+  // Tablet layout with split view
+  Widget _buildTabletLayout() {
+    return Row(
+      children: [
+        Expanded(flex: 1, child: _createBoatList()),
+        Expanded(
+          flex: 2,
+          child: _selectedIdx == null
+              ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectBoat")!))
+              : BoatFormPanel(
+            key: ValueKey(_boatList[_selectedIdx!].id),
+            boat: _boatList[_selectedIdx!],
+            onSubmit: _handleWidgetSave,
           ),
         ),
-        backgroundColor: Colors.blue[700],
-        child: Icon(Icons.add),
-      ),
-      body: _reactiveLayout(),
+      ],
     );
   }
 
-  /// Displays reactive panels based on screen size.
-  Widget _reactiveLayout() {
-    if (_isTablet) {
-      return Row(
-        children: [
-          Expanded(flex: 1, child: _buildList()),
-          Expanded(
-            flex: 2,
-            child: _selectedIndex == null
-                ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectBoat")!))
-                : BoatFormPanel(
-              key: ValueKey(_boats[_selectedIndex!].id),
-              boat: _boats[_selectedIndex!],
-              onSubmit: _saveCallbackFromWidget,
-            ),
-          ),
-        ],
-      );
-    } else {
-      if (_selectedIndex == null && _boats.isNotEmpty) {
-        return _buildList();
-      } else {
-        return _buildDetailPanel();
-      }
-    }
+  // Phone layout with single view
+  Widget _buildPhoneLayout() {
+    final showList = _selectedIdx == null && _boatList.isNotEmpty;
+    return showList ? _createBoatList() : _createDetailView();
   }
 
-  /// Displays detail Panel.
-  Widget _buildDetailPanel() {
-    return _selectedIndex == null
+  // Create detail view for phone mode
+  Widget _createDetailView() {
+    return _selectedIdx == null
         ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectBoat")!))
         : BoatFormPanel(
-      key: ValueKey(_boats[_selectedIndex!].id),
-      boat: _boats[_selectedIndex!],
-      onSubmit: _saveCallbackFromWidget,
+      key: ValueKey(_boatList[_selectedIdx!].id),
+      boat: _boatList[_selectedIdx!],
+      onSubmit: _handleWidgetSave,
     );
   }
 
-  /// Builds the scrollable list of boats.
-  Widget _buildList() {
+  // Create scrollable boat list
+  Widget _createBoatList() {
     return ListView.builder(
-      itemCount: _boats.length,
-      itemBuilder: (_, i) {
-        final boat = _boats[i];
-        return Card(
-          margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: ListTile(
-            leading: Icon(Icons.sailing, color: Colors.blue[700],size: 36),
-            title: Text(
-              '${boat.yearBuilt} - ${boat.powerType}',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(boat.address),
-            trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue[700],size: 24),
-            onTap: () => _selectBoat(boat),
-          ),
-        );
-      },
+      itemCount: _boatList.length,
+      itemBuilder: (context, idx) => _buildBoatCard(_boatList[idx]),
     );
   }
 
-  /// Called when the form page finishes saving a boat (phone mode).
-  void _saveCallbackFromPage() {
-    _reload();
+  // Build individual boat card
+  Widget _buildBoatCard(Boat boat) {
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      child: ListTile(
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Icon(Icons.sailing, color: Colors.blue[700], size: 36),
+        title: Text(
+          '${boat.yearBuilt} ${boat.powerType} - \$${boat.price}',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Length: ${boat.boatLength}'),
+              Text(boat.address),
+            ],
+          ),
+        ),
+        trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue[700], size: 20),
+        onTap: () => _onBoatTap(boat),
+      ),
+    );
   }
 
-  /// Called when the boat form panel saves data (tablet mode).
-  void _saveCallbackFromWidget() {
-    _reload();
-    _selectedIndex = null;
+  // Refresh boat list from database
+  Future<void> _refreshBoats() async {
+    final boats = await _boatSvc.getBoats();
+    setState(() => _boatList = boats);
   }
 
-  /// Reloads boat data from the service and updates the UI.
-  Future<void> _reload() async {
-    final data = await _service.getBoats();
+  // Handle save from page navigation
+  void _handlePageSave() => _refreshBoats();
 
-    setState(() {
-      _boats = data;
-    });
+  // Handle save from widget
+  void _handleWidgetSave() {
+    setState(() => _selectedIdx = null);
+    _refreshBoats();
   }
 
-  /// Shows a Snackbar message at the bottom of the screen.
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  // Display snackbar message
+  void _displaySnackBar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  /// Shows an instruction dialog explaining how to use the page.
-  void _showInstructions() {
+  // Show instructions dialog
+  void _displayInstructions() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -167,25 +182,29 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  /// Handles boat selection based on the device layout.
-  void _selectBoat(Boat boat) {
-    if (_isTablet) {
-      setState(() {
-        _selectedIndex = _boats.indexOf(boat);
-      });
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => BoatFormPage(
-            boat: boat,
-            onSave: () {
-              _saveCallbackFromPage();
-            },
-          ),
+  // Handle boat selection
+  void _onBoatTap(Boat selectedBoat) {
+    _tabletMode 
+        ? _selectBoatInTabletMode(selectedBoat) 
+        : _navigateToBoatForm(selectedBoat);
+  }
+
+  // Select boat in tablet mode
+  void _selectBoatInTabletMode(Boat boat) {
+    setState(() => _selectedIdx = _boatList.indexOf(boat));
+  }
+
+  // Navigate to boat form in phone mode
+  void _navigateToBoatForm(Boat boat) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BoatFormPage(
+          boat: boat,
+          onSave: _handlePageSave,
         ),
-      );
-    }
+      ),
+    );
   }
 }
 
