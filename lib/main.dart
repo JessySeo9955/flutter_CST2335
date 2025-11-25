@@ -6,6 +6,7 @@ import 'customer/page/customer_list_page.dart';
 import 'customer/service/customer_service.dart';
 import 'boat/page/boat_list_page.dart';
 import 'boat/service/boat_service.dart';
+import 'car/page/car_list_page.dart';
 
 
 /// Entry point of the application.
@@ -15,6 +16,7 @@ void main() async {
   await BoatService().init();
   runApp(const MyApp());
 }
+
 /// The root widget of the application.
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -61,8 +63,8 @@ class MyAppState extends State<MyApp> {
       initialRoute: '/',
       routes: {
         '/': (context) => const MyHomePage(),
-         '/customer': (context) => CustomerListPage(),
-        '/car': (context) => DummyPage(title: "Car Page"),
+        '/customer': (context) => CustomerListPage(),
+        '/car': (context) => const CarListPage(),
         '/boat': (context) => BoatListPage(),
         '/purchase': (context) => DummyPage(title: "Purchase Page"),
       },
@@ -87,7 +89,6 @@ class MyHomePage extends StatelessWidget {
             onSelected: (value) {
               if (value == "en") MyApp.setLocale(context, const Locale("en"));
               if (value == "en_GB") MyApp.setLocale(context, const Locale("en", "GB"));
-
             },
             itemBuilder: (context) => [
               const PopupMenuItem(value: "en", child: Text("English-US")),
