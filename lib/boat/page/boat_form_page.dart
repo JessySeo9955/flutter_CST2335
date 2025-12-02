@@ -5,9 +5,13 @@ import '../widget/boat_form_panel.dart';
 
 // Page for displaying boat form
 class BoatFormPage extends StatelessWidget {
+  /// The boat we want to edit (null if adding new boat)
   final Boat? boat;
+  
+  /// Function to call when we save the boat
   final VoidCallback onSave;
 
+  /// Creates the boat form page
   const BoatFormPage({super.key, this.boat, required this.onSave});
 
   @override
@@ -21,7 +25,8 @@ class BoatFormPage extends StatelessWidget {
     );
   }
 
-  // Build app bar with dynamic title
+  /// Creates the top bar of the screen
+  /// Shows "Add Boat" if new, "Edit Boat" if editing
   AppBar _buildAppBar(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
     final title = boat == null 
@@ -34,7 +39,8 @@ class BoatFormPage extends StatelessWidget {
     );
   }
 
-  // Handle form submission
+  /// What happens when you save the form
+  /// It saves the boat and goes back to the previous screen
   void _handleSubmit(BuildContext context) {
     onSave();
     Navigator.pop(context);

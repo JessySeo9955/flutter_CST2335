@@ -3,42 +3,42 @@ import '../data/boat_database.dart';
 import '../data/boat_model.dart';
 import '../preference/boat_prefs.dart';
 
-// Service layer for boat operations
+/// This service helps us work with boats
 class BoatService {
-  // Singleton instance
+  /// This creates only one copy of the service for the whole app
   static final BoatService _singleton = BoatService._privateConstructor();
   
-  // Private constructor
+  /// This is the private constructor so no one else can create a copy
   BoatService._privateConstructor();
   
-  // Factory constructor returns singleton
+  /// This returns the same service every time
   factory BoatService() => _singleton;
 
-  // DAO instance for database access
+  /// This helps us talk to the database
   late BoatDao _boatDao;
 
-  // Initialize database connection
+  /// This sets up the database when the app starts
   Future<void> init() async {
     final database = await $FloorBoatDatabase.databaseBuilder("boat.db").build();
     _boatDao = database.boatDao;
   }
 
-  // Retrieve all boats from database
+  /// This gets all boats from the database
   Future<List<Boat>> getBoats() {
     return _boatDao.getAllBoats();
   }
 
-  // Delete boat from database
+  /// This deletes a boat from the database
   Future<void> deleteBoat(Boat boat) async {
     await _boatDao.deleteBoat(boat);
   }
 
-  // Update existing boat in database
+  /// This updates a boat that already exists
   Future<int> updateBoat(Boat boat) async {
     return await _boatDao.updateBoat(boat);
   }
 
-  // Insert new boat and save to preferences
+  /// This saves a new boat and remembers it for copying later
   Future<void> saveBoat(Boat boat) async {
     await _boatDao.insertBoat(boat);
     
@@ -51,14 +51,17 @@ class BoatService {
     });
   }
 
-  // Load last saved boat from preferences
+  /// This loads the last boat you saved so you can copy it
   Future<Boat?> loadLastBoat() async {
+    /// Get the saved boat data
     final data = await BoatPrefs.loadLastBoat();
     
+    /// If there is no saved boat, return nothing
     if (data == null) {
       return null;
     }
     
+    /// Create a boat object from the saved data
     final boat = Boat(
       address: data['address'] ?? "",
       price: data['price'] ?? "",
@@ -70,8 +73,9 @@ class BoatService {
     return boat;
   }
 
-  // Validate boat fields are not empty
+  /// This checks if all boat fields are filled in
   bool validateFields(Boat boat) {
+    /// Make a list of all the fields to check
     final fields = [
       boat.address,
       boat.price,
@@ -80,6 +84,7 @@ class BoatService {
       boat.yearBuilt
     ];
     
+    /// Check each field to make sure it's not empty
     for (final field in fields) {
       if (field.isEmpty) return false;
     }
