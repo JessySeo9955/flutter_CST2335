@@ -48,6 +48,7 @@ dependencies:
   dartdoc: ^8.0.7
 
   sqflite: any
+  path: ^1.8.3
 dev_dependencies:
   flutter_test:
     sdk: flutter

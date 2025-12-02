@@ -43,5 +43,32 @@
   "DeleteConfirmBoat": "Are you sure you want to delete this boat?",
   "EditBoatForm": "Edit Boat",
   "NewBoat": "New Boat",
-  "CopyPreviousBoat": "Copy previous boat"
+  "CopyPreviousBoat": "Copy previous boat",
+
+  "Cars": "Cars for Sale",
+  "InstructionsTitleCar": "Instructions",
+  "InstructionsContentCar": "Tap + to add cars.\nTap a car to view details.",
+  "SelectCar": "Select a car",
+  "AddCar": "Add Car",
+  "EditCar": "Edit Car",
+
+  "CarYear": "Year of Manufacture",
+  "CarMake": "Make (Manufacturer)",
+  "CarModel": "Model",
+  "CarPrice": "Price",
+  "CarKilometres": "Kilometres Driven",
+
+  "DeleteTitleCar": "Delete Car",
+  "DeleteConfirmCar": "Are you sure you want to delete this car?",
+  "EditCarForm": "Edit Car",
+  "NewCar": "New Car",
+  "CopyPreviousCar": "Copy Previous Car",
+
+  "CarSaved": "Car saved successfully",
+  "CarUpdated": "Car updated successfully",
+  "CarDeleted": "Car deleted successfully",
+  "CarErrorSaving": "Error saving car",
+  "CarErrorDeleting": "Error deleting car",
+  "CarPleaseFillAllFields": "Please fill in all fields"
+
 }
