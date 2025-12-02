@@ -5,7 +5,7 @@ import '../data/boat_model.dart';
 import '../service/boat_service.dart';
 import '../widget/boat_form_panel.dart';
 
-// Main page displaying boat list
+/// This page shows a list of all boats
 class BoatListPage extends StatefulWidget {
   const BoatListPage({super.key});
 
@@ -13,19 +13,25 @@ class BoatListPage extends StatefulWidget {
   _BoatListPageState createState() => _BoatListPageState();
 }
 
-// State for boat list page
+/// The state that controls what the boat list page shows
 class _BoatListPageState extends State<BoatListPage> {
+  /// This helps us save and get boats from the database
   final BoatService _boatSvc = BoatService();
+  /// This holds all the boats we want to show
   List<Boat> _boatList = [];
+  /// This tells us if we are on a tablet or phone
   bool _tabletMode = false;
+  /// This remembers which boat is selected
   int? _selectedIdx;
 
+  /// This runs when the page first starts
   @override
   void initState() {
     super.initState();
     _refreshBoats();
   }
 
+  /// This builds what you see on the screen
   @override
   Widget build(BuildContext context) {
     _tabletMode = MediaQuery.of(context).size.width > 600;
@@ -37,7 +43,7 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Build app bar
+  /// This builds the top bar with the title and info button
   AppBar _buildAppBar() {
     return AppBar(
       title: Text(AppLocalizations.of(context)!.translate('Boats')!),
@@ -51,7 +57,7 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Build floating action button
+  /// Builds the button to add a new boat
   FloatingActionButton _buildAddButton() {
     return FloatingActionButton(
       onPressed: () => _navigateToNewBoatForm(),
@@ -60,7 +66,7 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Navigate to new boat form
+  /// This opens the form to add a new boat
   void _navigateToNewBoatForm() {
     Navigator.push(
       context,
@@ -75,12 +81,12 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Build adaptive layout for different screen sizes
+  /// This decides if we show tablet or phone layout
   Widget _buildResponsiveLayout() {
     return _tabletMode ? _buildTabletLayout() : _buildPhoneLayout();
   }
 
-  // Tablet layout with split view
+  /// This builds the tablet layout with list on left and form on right
   Widget _buildTabletLayout() {
     return Row(
       children: [
@@ -99,13 +105,13 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Phone layout with single view
+  /// This builds the phone layout with one screen at a time
   Widget _buildPhoneLayout() {
     final showList = _selectedIdx == null && _boatList.isNotEmpty;
     return showList ? _createBoatList() : _createDetailView();
   }
 
-  // Create detail view for phone mode
+  /// This shows the boat details on phone
   Widget _createDetailView() {
     return _selectedIdx == null
         ? Center(child: Text(AppLocalizations.of(context)!.translate("SelectBoat")!))
@@ -116,7 +122,7 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Create scrollable boat list
+  /// This creates a scrolling list of all boats
   Widget _createBoatList() {
     return ListView.builder(
       itemCount: _boatList.length,
@@ -124,7 +130,7 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Build individual boat card
+  /// This builds one boat card to show in the list
   Widget _buildBoatCard(Boat boat) {
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -151,27 +157,27 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Refresh boat list from database
+  /// This gets all boats from the database and updates the screen
   Future<void> _refreshBoats() async {
     final boats = await _boatSvc.getBoats();
     setState(() => _boatList = boats);
   }
 
-  // Handle save from page navigation
+  /// This refreshes the list when you save from a new page
   void _handlePageSave() => _refreshBoats();
 
-  // Handle save from widget
+  /// This refreshes the list when you save from the widget
   void _handleWidgetSave() {
     setState(() => _selectedIdx = null);
     _refreshBoats();
   }
 
-  // Display snackbar message
+  /// This shows a message at the bottom of the screen
   void _displaySnackBar(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  // Show instructions dialog
+  /// This shows the help instructions popup
   void _displayInstructions() {
     showDialog(
       context: context,
@@ -182,19 +188,19 @@ class _BoatListPageState extends State<BoatListPage> {
     );
   }
 
-  // Handle boat selection
+  /// This handles what happens when you click a boat
   void _onBoatTap(Boat selectedBoat) {
     _tabletMode 
         ? _selectBoatInTabletMode(selectedBoat) 
         : _navigateToBoatForm(selectedBoat);
   }
 
-  // Select boat in tablet mode
+  /// This selects a boat on tablet to show on the right side
   void _selectBoatInTabletMode(Boat boat) {
     setState(() => _selectedIdx = _boatList.indexOf(boat));
   }
 
-  // Navigate to boat form in phone mode
+  /// This opens the boat form on phone in a new screen
   void _navigateToBoatForm(Boat boat) {
     Navigator.push(
       context,

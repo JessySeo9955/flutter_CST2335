@@ -1,18 +1,18 @@
 import 'package:floor/floor.dart';
 import 'boat_model.dart';
 
-// DAO interface for boat database operations
+/// This helps us talk to the database for boats
 @dao
 abstract class BoatDao {
-  // Delete operation - removes boat record
+  /// This deletes a boat from the database
   @delete
   Future<int> deleteBoat(Boat boat);
 
-  // Update operation - modifies existing boat
+  /// This updates a boat that already exists
   @update
   Future<int> updateBoat(Boat boat);
 
-  // Insert operation - adds new boat record
+  /// This adds a new boat to the database
   @insert
   Future<int> insertBoat(Boat boat);
 

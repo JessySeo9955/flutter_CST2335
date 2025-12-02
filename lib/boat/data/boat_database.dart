@@ -6,10 +6,10 @@ import 'boat_model.dart';
 
 part 'boat_database.g.dart';
 
-// Floor database configuration for boat storage
+/// This is the boat database where we store all boats
 @Database(version: 1, entities: [Boat])
 abstract class BoatDatabase extends FloorDatabase {
-  // Getter for boat data access object
+  /// This gives us access to boat operations
   BoatDao get boatDao;
 }
 

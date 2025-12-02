@@ -3,9 +3,11 @@ import '../../AppLocalizations.dart';
 import '../data/boat_model.dart';
 import '../service/boat_service.dart';
 
-// Form panel for boat creation and editing
+/// This is the form where you add or edit boat information
 class BoatFormPanel extends StatefulWidget {
+  /// The boat we are editing, or null if adding a new boat
   final Boat? boat;
+  /// The function to call when we finish saving
   final VoidCallback onSubmit;
 
   const BoatFormPanel({super.key, this.boat, required this.onSubmit});
@@ -14,24 +16,37 @@ class BoatFormPanel extends StatefulWidget {
   State<StatefulWidget> createState() => _BoatFormPanelState();
 }
 
-// State for boat form panel
+/// The state that controls the boat form
 class _BoatFormPanelState extends State<BoatFormPanel> {
+  /// This helps us save and load boats
   final BoatService _boatService = BoatService();
 
+  /// This controls what you type in the address box
   late TextEditingController _addressCtrl;
+  /// This controls what you type in the price box
   late TextEditingController _priceCtrl;
+  /// This controls what you type in the power type box
   late TextEditingController _powerCtrl;
+  /// This controls what you type in the length box
   late TextEditingController _lengthCtrl;
+  /// This controls what you type in the year box
   late TextEditingController _yearCtrl;
 
+  /// This tells us if we are editing or adding a new boat
   bool _isEditMode = false;
 
+  /// This holds the error message for address
   String? _addressErr;
+  /// This holds the error message for price
   String? _priceErr;
+  /// This holds the error message for power type
   String? _powerErr;
+  /// This holds the error message for length
   String? _lengthErr;
+  /// This holds the error message for year
   String? _yearErr;
 
+  /// This runs when the form first starts
   @override
   void initState() {
     super.initState();
@@ -43,6 +58,7 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     _yearCtrl = TextEditingController(text: widget.boat?.yearBuilt);
   }
 
+  /// This cleans up when the form is closed
   @override
   void dispose() {
     _addressCtrl.dispose();
@@ -53,7 +69,7 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     super.dispose();
   }
 
-  // Check if field is valid
+  /// This checks if a field is empty and shows an error if it is
   void _checkField(String fieldName, String fieldValue) {
     setState(() {
       final errorMsg = fieldValue.isEmpty ? '${fieldName.toUpperCase()} is required' : null;
@@ -78,10 +94,12 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     });
   }
 
-  // Submit form data
+  /// This saves the boat when you click submit
   void _submitForm() async {
+    /// Get the translation helper
     final localization = AppLocalizations.of(context)!;
 
+    /// Make a list of all fields to check
     final fieldsToValidate = {
       'address': _addressCtrl.text,
       'price': _priceCtrl.text,
@@ -90,11 +108,14 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
       'year': _yearCtrl.text,
     };
 
+    /// Check each field for errors
     fieldsToValidate.forEach((name, value) => _checkField(name, value));
 
+    /// See if any field has an error
     final hasErrors = [_addressErr, _priceErr, _powerErr, _lengthErr, _yearErr]
         .any((error) => error != null);
 
+    /// If there are errors, show a message and don't save
     if (hasErrors) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(localization.translate("PleaseFillAllFields")!)),
@@ -102,6 +123,7 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
       return;
     }
 
+    /// Create a boat object with all the information
     final boatData = Boat(
       id: _isEditMode ? widget.boat!.id : null,
       address: _addressCtrl.text,
@@ -111,29 +133,35 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
       yearBuilt: _yearCtrl.text,
     );
 
+    /// Get the right success message
     final msg = _isEditMode 
         ? localization.translate("Updated")! 
         : localization.translate("Saved")!;
 
+    /// Save or update the boat in the database
     _isEditMode 
         ? await _boatService.updateBoat(boatData)
         : await _boatService.saveBoat(boatData);
 
+    /// Show success message
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     _closeForm();
   }
 
-  // Close form and notify parent
+  /// This closes the form and tells the parent we are done
   void _closeForm() async {
     widget.onSubmit();
   }
 
-  // Copy previous boat data to form
+  /// This copies information from the last boat you saved
   void _copyPrevious() async {
+    /// Load the last boat from storage
     final previousBoat = await _boatService.loadLastBoat();
     
+    /// If there is no previous boat, do nothing
     if (previousBoat == null) return;
     
+    /// Fill in all the fields with the previous boat information
     setState(() {
       _addressCtrl.text = previousBoat.address;
       _priceCtrl.text = previousBoat.price;
@@ -143,10 +171,11 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     });
   }
 
-  // Remove boat after confirmation
+  /// This deletes the boat after asking if you are sure
   void _removeBoat() {
     final localization = AppLocalizations.of(context)!;
 
+    /// Show a popup to ask if you really want to delete
     showDialog(
       context: context,
       builder: (dialogCtx) {
@@ -172,7 +201,7 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     );
   }
 
-  // Build form header with title
+  /// This builds the header with the title and copy button
   Widget _createHeader() {
     final localization = AppLocalizations.of(context)!;
 
@@ -195,10 +224,11 @@ class _BoatFormPanelState extends State<BoatFormPanel> {
     );
   }
 
+  /// This builds what you see on the screen
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
-
+    /// This builds the form with all the fields and buttons
     return Padding(
       padding: const EdgeInsets.all(20.0),
       child: Column(

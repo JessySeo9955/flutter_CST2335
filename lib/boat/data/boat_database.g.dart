@@ -30,34 +30,40 @@ class $FloorBoatDatabase {
   static $BoatDatabaseBuilderContract inMemoryDatabaseBuilder() =>
       _$BoatDatabaseBuilder(null);
 }
-
+/// Builder for the boat database
 class _$BoatDatabaseBuilder implements $BoatDatabaseBuilderContract {
   _$BoatDatabaseBuilder(this.name);
-
+  /// Name of the database
   final String? name;
-
+  /// Migrations for the database
   final List<Migration> _migrations = [];
-
+  /// Callback for the database
   Callback? _callback;
 
+  /// Add migrations to the database
   @override
   $BoatDatabaseBuilderContract addMigrations(List<Migration> migrations) {
     _migrations.addAll(migrations);
     return this;
   }
 
+  /// Add a callback to the database
   @override
   $BoatDatabaseBuilderContract addCallback(Callback callback) {
     _callback = callback;
     return this;
   }
 
+  /// Build the database
   @override
   Future<BoatDatabase> build() async {
+    /// Path to the database
     final path = name != null
         ? await sqfliteDatabaseFactory.getDatabasePath(name!)
         : ':memory:';
+    /// Database object
     final database = _$BoatDatabase();
+    /// Open the database
     database.database = await database.open(
       path,
       _migrations,
@@ -66,12 +72,14 @@ class _$BoatDatabaseBuilder implements $BoatDatabaseBuilderContract {
     return database;
   }
 }
-
+/// Implementation of the boat database
 class _$BoatDatabase extends BoatDatabase {
+  /// Constructor for the boat database
   _$BoatDatabase([StreamController<String>? listener]) {
     changeListener = listener ?? StreamController<String>.broadcast();
   }
 
+  /// Boat data access object instance
   BoatDao? _boatDaoInstance;
 
   Future<sqflite.Database> open(
@@ -79,37 +87,46 @@ class _$BoatDatabase extends BoatDatabase {
     List<Migration> migrations, [
     Callback? callback,
   ]) async {
+    /// Database options
     final databaseOptions = sqflite.OpenDatabaseOptions(
       version: 1,
       onConfigure: (database) async {
+        /// Configure the database
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
       },
       onOpen: (database) async {
+        /// Open the database
         await callback?.onOpen?.call(database);
       },
       onUpgrade: (database, startVersion, endVersion) async {
+        /// Run migrations
         await MigrationAdapter.runMigrations(
             database, startVersion, endVersion, migrations);
 
+        /// Callback on upgrade
         await callback?.onUpgrade?.call(database, startVersion, endVersion);
       },
       onCreate: (database, version) async {
+        /// Create the table
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `Boat` (`id` INTEGER, `yearBuilt` TEXT NOT NULL, `boatLength` TEXT NOT NULL, `powerType` TEXT NOT NULL, `price` TEXT NOT NULL, `address` TEXT NOT NULL, PRIMARY KEY (`id`))');
 
+        /// Callback on create
         await callback?.onCreate?.call(database, version);
       },
     );
+    /// Open the database
     return sqfliteDatabaseFactory.openDatabase(path, options: databaseOptions);
   }
-
+/// Get the boat data access object
   @override
   BoatDao get boatDao {
     return _boatDaoInstance ??= _$BoatDao(database, changeListener);
   }
 }
 
+/// Implementation of the boat data access object
 class _$BoatDao extends BoatDao {
   _$BoatDao(
     this.database,
@@ -150,19 +167,21 @@ class _$BoatDao extends BoatDao {
                   'price': item.price,
                   'address': item.address
                 });
-
+  /// Database executor
   final sqflite.DatabaseExecutor database;
-
+  /// Change listener
   final StreamController<String> changeListener;
-
+  /// Query adapter
   final QueryAdapter _queryAdapter;
-
+  /// Insertion adapter
   final InsertionAdapter<Boat> _boatInsertionAdapter;
-
+  /// Update adapter
   final UpdateAdapter<Boat> _boatUpdateAdapter;
 
+  /// Deletion adapter
   final DeletionAdapter<Boat> _boatDeletionAdapter;
 
+  /// Get all boats
   @override
   Future<List<Boat>> getAllBoats() async {
     return _queryAdapter.queryList('Select * From Boat',
@@ -175,18 +194,21 @@ class _$BoatDao extends BoatDao {
             address: row['address'] as String));
   }
 
+  /// Insert a boat
   @override
   Future<int> insertBoat(Boat boat) {
     return _boatInsertionAdapter.insertAndReturnId(
         boat, OnConflictStrategy.abort);
   }
 
+  /// Update a boat
   @override
   Future<int> updateBoat(Boat boat) {
     return _boatUpdateAdapter.updateAndReturnChangedRows(
         boat, OnConflictStrategy.abort);
   }
 
+  /// Delete a boat
   @override
   Future<int> deleteBoat(Boat boat) {
     return _boatDeletionAdapter.deleteAndReturnChangedRows(boat);
